@@ -27,7 +27,8 @@ local function get_hwmon_sensors()
                     local sensor_name = name_file:read("*line")
                     name_file:close()
                     
-                    if sensor_name then
+                    -- Skip sensors named "AC"
+                    if sensor_name and sensor_name ~= "AC" then
                         table.insert(hwmon_sensors, {
                             num = tonumber(hwmon_num),
                             name = sensor_name,
