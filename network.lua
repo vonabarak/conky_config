@@ -1,6 +1,21 @@
 -- Cache the entire output template (built once at startup)
 local net_output = nil
 
+local ping_host = "n2.v7k.me"
+local ping_port = 8000
+local ifconfig_url = "http://" .. ping_host .. ":" .. tostring(ping_port) .. "/ifconfig"
+
+-- Check if interface exists
+local function interface_exists(iface)
+    local path = "/sys/class/net/" .. iface
+    local f = io.open(path .. "/operstate", "r")
+    if f then
+        f:close()
+        return true
+    end
+    return false
+end
+
 -- Check if interface is wireless
 local function is_wireless(iface)
     local wireless_path = "/sys/class/net/" .. iface .. "/wireless"
@@ -30,13 +45,14 @@ function conky_get_network(...)
     end
     
     -- Layout
-    local label_width = 100
+    local label_width = 140
     local addr_width = 140
-    local up_down_width = 120
+    local up_down_width = 60
+    local padding = 10
 
-    local col_down = layout.right - math.floor(up_down_width /2)
-    local col_up = col_down - up_down_width
-    local col_addr = col_up - addr_width
+    local col_down = layout.right - up_down_width
+    local col_up = col_down - up_down_width - padding
+    local col_addr = layout.left + label_width
     
     
     
@@ -52,6 +68,12 @@ function conky_get_network(...)
     
     -- Each interface
     for _, iface in ipairs(interfaces) do
+        -- Skip if interface doesn't exist
+        if not interface_exists(iface) then
+            print(string.format("[network.lua] Interface: %s (not found, skipping)", iface))
+            goto continue
+        end
+        
         local wireless = is_wireless(iface)
         print(string.format("[network.lua] Interface: %s (wireless=%s)", iface, tostring(wireless)))
         
@@ -79,10 +101,16 @@ function conky_get_network(...)
         end
         
         net_output = net_output .. "${endif}"
+        
+        ::continue::
     end
     
-    -- Remove trailing newline
-    net_output = net_output:gsub("\n${endif}$", "${endif}")
+    -- External IP (cached for 5 minutes)
+    net_output = net_output .. string.format(
+        "\nExternal: ${color %s}${curl %s 5}${color} Ping: ${color %s}${tcp_ping %s %d}${color}ms",
+        colors.value, ifconfig_url, colors.value, ping_host, ping_port
+    )
+    
     
     return net_output
 end
