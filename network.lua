@@ -45,7 +45,7 @@ function conky_get_network(...)
     end
     
     -- Layout
-    local label_width = 140
+    local label_width = 110
     local addr_width = 140
     local up_down_width = 60
     local padding = 10
@@ -77,11 +77,14 @@ function conky_get_network(...)
         local wireless = is_wireless(iface)
         print(string.format("[network.lua] Interface: %s (wireless=%s)", iface, tostring(wireless)))
         
+        -- Truncate interface name to 10 characters for display
+        local iface_display = string.sub(iface, 1, 10)
+        
         -- Interface line with if_up condition
         net_output = net_output .. string.format("${if_up %s}", iface)
         net_output = net_output .. string.format(
             "%s${goto %d}${color %s}${addr %s}${color}${goto %d}${upspeed %s}${goto %d}${downspeed %s}\n",
-            iface, col_addr, colors.value, iface, col_up, iface, col_down, iface
+            iface_display, col_addr, colors.value, iface, col_up, iface, col_down, iface
         )
         
         -- Wireless-specific info
