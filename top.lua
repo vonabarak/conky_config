@@ -10,7 +10,7 @@ function conky_get_top_processes()
     print("[top.lua] Building output template...")
     
     -- Layout based on window width
-    local pid_width = 120
+    local pid_width = 100
     local cpu_width = 60
     local mem_width = 60
 

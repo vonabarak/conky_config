@@ -18,16 +18,16 @@ local function get_screen_resolution()
     
     -- Fallback to common resolution
     print("[layout.lua] Failed to detect screen resolution, using fallback 1920x1080")
-    return 1920, 1080
+    return 2560, 1440
 end
 
 local window_width = 420
 local window_height = 10
 local border_width = 1
 local border_inner_margin = 10
-local border_outer_margin = 40
-local margin_x = 20
-local margin_y = 40  -- margin from top of screen, should be enough for the top panel
+local border_outer_margin = 10
+local margin_x = 30
+local margin_y = 80  -- margin from top of screen, should be enough for the top panel
 local graph_height = 40
 
 local screen_width, screen_height = get_screen_resolution()
