@@ -1,9 +1,10 @@
 -- Cache the entire output template (built once at startup)
 local net_output = nil
 
-local ping_host = "n2.v7k.me"
-local ping_port = 8000
-local ifconfig_url = "http://" .. ping_host .. ":" .. tostring(ping_port) .. "/ifconfig"
+local ping_host = "1.1.1.1"
+local ping_port = 53
+local ifconfig4_url = "http://128.140.92.72:8000/ifconfig"
+local ifconfig6_url = "http://[2a01:4f8:c013:17dd::1]:8000/ifconfig"
 
 -- Check if interface exists
 local function interface_exists(iface)
@@ -110,8 +111,18 @@ function conky_get_network(...)
     
     -- External IP (cached for 5 minutes)
     net_output = net_output .. string.format(
-        "\nExternal: ${color %s}${curl %s 5}${color} Ping: ${color %s}${tcp_ping %s %d}${color}ms",
-        colors.value, ifconfig_url, colors.value, ping_host, ping_port
+        "\nExternal IP: v4 ${color %s}${curl %s 5}${color}",
+        colors.value, ifconfig4_url
+    )
+    -- IPv6 (may not be available, use execi with timeout)
+    net_output = net_output .. string.format(
+        "\nv6 ${color %s}${execi 300 curl -6 -s --connect-timeout 2 %s 2>/dev/null || echo N/A}${color}",
+        colors.value, ifconfig6_url
+    )
+    -- Ping
+    net_output = net_output .. string.format(
+        "\nPing: ${color %s}${tcp_ping %s %d}${color}ms",
+        colors.value, ping_host, ping_port
     )
     
     
